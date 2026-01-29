@@ -1,6 +1,9 @@
 import { ColorTheme, ColorThemeConfig, ColorMode } from '@/types/chart';
 
-export const COLOR_THEMES: Record<ColorTheme, ColorThemeConfig> = {
+// プリセットテーマのみを含む型
+export type PresetColorTheme = Exclude<ColorTheme, 'custom'>;
+
+export const COLOR_THEMES: Record<PresetColorTheme, ColorThemeConfig> = {
   blue: {
     name: 'blue',
     label: 'Blue',
@@ -81,6 +84,16 @@ export const COLOR_THEMES: Record<ColorTheme, ColorThemeConfig> = {
 export const DEFAULT_THEME: ColorTheme = 'blue';
 
 /**
+ * テーマに応じた色配列を取得
+ */
+function getThemeColors(theme: ColorTheme, customColors?: string[]): string[] {
+  if (theme === 'custom' && customColors) {
+    return customColors;
+  }
+  return COLOR_THEMES[theme as PresetColorTheme]?.colors ?? COLOR_THEMES.blue.colors;
+}
+
+/**
  * データ数に応じて適切な色を返す（棒グラフ用）
  * 濃い色から順に使用し、色覚異常にも配慮した明度差を確保
  */
@@ -88,9 +101,10 @@ export function getColorsForData(
   theme: ColorTheme,
   count: number,
   mode: ColorMode = 'gradient',
-  highlightedIndices?: number[]
+  highlightedIndices?: number[],
+  customColors?: string[]
 ): string[] {
-  const themeColors = COLOR_THEMES[theme].colors;
+  const themeColors = getThemeColors(theme, customColors);
 
   if (count <= 0) return [];
 
@@ -129,9 +143,10 @@ export function getColorsForLine(
   theme: ColorTheme,
   count: number,
   mode: ColorMode = 'gradient',
-  highlightedIndices?: number[]
+  highlightedIndices?: number[],
+  customColors?: string[]
 ): string[] {
-  const themeColors = COLOR_THEMES[theme].colors;
+  const themeColors = getThemeColors(theme, customColors);
   // 濃い方の4色のみ使用
   const darkColors = themeColors.slice(0, 4);
 

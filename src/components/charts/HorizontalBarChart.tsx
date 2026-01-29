@@ -11,6 +11,7 @@ interface HorizontalBarChartProps {
   theme: ColorTheme;
   colorMode?: ColorMode;
   highlightedIndices?: number[];
+  customColors?: string[];
   width?: number;
   height?: number;
 }
@@ -20,6 +21,7 @@ export default function HorizontalBarChart({
   theme,
   colorMode = 'gradient',
   highlightedIndices,
+  customColors,
   width = 600,
   height = 400,
 }: HorizontalBarChartProps) {
@@ -37,7 +39,7 @@ export default function HorizontalBarChart({
     const innerHeight = height - margin.top - margin.bottom;
 
     // 色の取得
-    const colors = getColorsForData(theme, data.items.length, colorMode, highlightedIndices);
+    const colors = getColorsForData(theme, data.items.length, colorMode, highlightedIndices, customColors);
 
     // スケール設定
     const maxValue = Math.max(...data.items.map((d) => d.value));
@@ -163,7 +165,7 @@ export default function HorizontalBarChart({
       .delay(400)
       .ease(d3.easeCubicOut)
       .attr('opacity', 1);
-  }, [data, theme, colorMode, highlightedIndices, width, height]);
+  }, [data, theme, colorMode, highlightedIndices, customColors, width, height]);
 
   return (
     <svg

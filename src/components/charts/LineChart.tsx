@@ -11,6 +11,7 @@ interface LineChartProps {
   theme: ColorTheme;
   colorMode?: ColorMode;
   highlightedIndices?: number[];
+  customColors?: string[];
   curveType?: CurveType;
   legendStyle?: LegendStyle;
   width?: number;
@@ -22,6 +23,7 @@ export default function LineChart({
   theme,
   colorMode = 'gradient',
   highlightedIndices,
+  customColors,
   curveType = 'curved',
   legendStyle = 'inline',
   width = 600,
@@ -46,7 +48,7 @@ export default function LineChart({
     const innerHeight = height - margin.top - margin.bottom;
 
     // 色の取得（折れ線は濃い色のみ使用）
-    const colors = getColorsForLine(theme, data.series.length, colorMode, highlightedIndices);
+    const colors = getColorsForLine(theme, data.series.length, colorMode, highlightedIndices, customColors);
 
     // スケール設定
     const allValues = data.series.flatMap((s) => s.values);
@@ -212,7 +214,7 @@ export default function LineChart({
           .text(series.name || `系列${i + 1}`);
       });
     }
-  }, [data, theme, colorMode, highlightedIndices, curveType, legendStyle, width, height]);
+  }, [data, theme, colorMode, highlightedIndices, customColors, curveType, legendStyle, width, height]);
 
   return (
     <svg

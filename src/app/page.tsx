@@ -9,8 +9,9 @@ import LineDataInputForm from '@/components/forms/LineDataInputForm';
 import ChartTypeSelector from '@/components/forms/ChartTypeSelector';
 import ThemeSelector from '@/components/forms/ThemeSelector';
 import DownloadButtons from '@/components/ui/DownloadButtons';
-import { ChartData, ChartType, ColorTheme, ColorMode, CurveType, LegendStyle, DataItem, LineChartData, SeriesData } from '@/types/chart';
+import { ChartData, ChartType, ColorTheme, ColorMode, CurveType, LegendStyle, AspectRatio, DataItem, LineChartData, SeriesData } from '@/types/chart';
 import { DEFAULT_THEME } from '@/constants/colorThemes';
+import { generateColorGradient, isValidHexColor } from '@/utils/generateColorTheme';
 
 // 棒グラフ用初期データ
 const initialBarItems: DataItem[] = [
@@ -32,6 +33,7 @@ export default function Home() {
   const chartRef = useRef<HTMLDivElement>(null);
   const [chartType, setChartType] = useState<ChartType>('horizontal-bar');
   const [theme, setTheme] = useState<ColorTheme>(DEFAULT_THEME);
+  const [customBaseColor, setCustomBaseColor] = useState<string | null>(null);
   const [colorMode, setColorMode] = useState<ColorMode>('gradient');
   const [highlightedBarIndices, setHighlightedBarIndices] = useState<number[]>([0]);
   const [highlightedLineIndices, setHighlightedLineIndices] = useState<number[]>([0]);
@@ -47,6 +49,7 @@ export default function Home() {
   const [series, setSeries] = useState<SeriesData[]>(initialSeries);
   const [curveType, setCurveType] = useState<CurveType>('curved');
   const [legendStyle, setLegendStyle] = useState<LegendStyle>('inline');
+  const [aspectRatio, setAspectRatio] = useState<AspectRatio>('4:3');
 
   const barChartData: ChartData = {
     title: barTitle,
@@ -66,8 +69,27 @@ export default function Home() {
 
   const currentTitle = chartType === 'line' ? lineTitle : barTitle;
 
+  // カスタムカラーの生成
+  const customColors = customBaseColor && isValidHexColor(customBaseColor)
+    ? generateColorGradient(customBaseColor)
+    : undefined;
+
+  const getChartHeight = (width: number): number => {
+    switch (aspectRatio) {
+      case '1:1':
+        return width;
+      case '4:3':
+        return Math.round(width * 3 / 4);
+      case '16:9':
+        return Math.round(width * 9 / 16);
+      default:
+        return Math.round(width * 3 / 4);
+    }
+  };
+
   const renderChart = () => {
     const chartWidth = 540;
+    const chartHeight = getChartHeight(chartWidth);
 
     switch (chartType) {
       case 'horizontal-bar':
@@ -77,8 +99,9 @@ export default function Home() {
             theme={theme}
             colorMode={colorMode}
             highlightedIndices={highlightedBarIndices}
+            customColors={customColors}
             width={chartWidth}
-            height={Math.max(300, barChartData.items.length * 60 + 120)}
+            height={chartHeight}
           />
         );
       case 'vertical-bar':
@@ -88,8 +111,9 @@ export default function Home() {
             theme={theme}
             colorMode={colorMode}
             highlightedIndices={highlightedBarIndices}
+            customColors={customColors}
             width={chartWidth}
-            height={400}
+            height={chartHeight}
           />
         );
       case 'line':
@@ -99,10 +123,11 @@ export default function Home() {
             theme={theme}
             colorMode={colorMode}
             highlightedIndices={highlightedLineIndices}
+            customColors={customColors}
             curveType={curveType}
             legendStyle={legendStyle}
             width={chartWidth}
-            height={400}
+            height={chartHeight}
           />
         );
     }
@@ -147,7 +172,16 @@ export default function Home() {
             Data Visualize Designer
           </h1>
           <p className="text-sm text-gray-500">
-            データ視覚化の原則に基づいた「正しいグラフ」を作成
+            本サイトの出力は
+            <a
+              href="https://note.com/goando/m/me00d3667f5ce"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-800 hover:underline"
+            >
+              goandoさんのデータ視覚化のデザイン
+            </a>
+            を参考にしています
           </p>
         </div>
       </header>
@@ -185,7 +219,12 @@ export default function Home() {
                   <ChartTypeSelector selected={chartType} onChange={setChartType} />
                 </div>
                 <div className="flex-1">
-                  <ThemeSelector selected={theme} onChange={setTheme} />
+                  <ThemeSelector
+                    selected={theme}
+                    onChange={setTheme}
+                    customBaseColor={customBaseColor}
+                    onCustomBaseColorChange={setCustomBaseColor}
+                  />
                 </div>
               </div>
 
@@ -246,7 +285,58 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* 2行目: 折れ線グラフ専用設定 */}
+              {/* アスペクト比 */}
+              <div className="pt-4 border-t border-gray-200">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  画像比率
+                </label>
+                <div className="flex gap-2 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => setAspectRatio('1:1')}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
+                      aspectRatio === '1:1'
+                        ? 'border-gray-900 bg-gray-50 text-gray-900'
+                        : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                    }`}
+                  >
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                      <rect x="4" y="4" width="16" height="16" stroke="currentColor" strokeWidth="2" rx="2" fill="none" />
+                    </svg>
+                    <span className="text-sm font-medium">1:1</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAspectRatio('4:3')}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
+                      aspectRatio === '4:3'
+                        ? 'border-gray-900 bg-gray-50 text-gray-900'
+                        : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                    }`}
+                  >
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                      <rect x="2" y="5" width="20" height="14" stroke="currentColor" strokeWidth="2" rx="2" fill="none" />
+                    </svg>
+                    <span className="text-sm font-medium">4:3</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAspectRatio('16:9')}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
+                      aspectRatio === '16:9'
+                        ? 'border-gray-900 bg-gray-50 text-gray-900'
+                        : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                    }`}
+                  >
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                      <rect x="1" y="7" width="22" height="10" stroke="currentColor" strokeWidth="2" rx="2" fill="none" />
+                    </svg>
+                    <span className="text-sm font-medium">16:9</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* 折れ線グラフ専用設定 */}
               {chartType === 'line' && (
                 <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 pt-4 border-t border-gray-200">
                   {/* 線のスタイル */}
@@ -369,26 +459,18 @@ export default function Home() {
 
             {/* 原則の説明 */}
             <div className="bg-blue-50 rounded-xl border border-blue-100 p-4">
-              <h3 className="text-sm font-semibold text-blue-900 mb-2">
-                適用されているデザイン原則
-              </h3>
-              <ul className="text-sm text-blue-800 space-y-1">
-                <li>
-                  <span className="font-medium">1.</span> タイトルで伝えたいメッセージを明確に
-                </li>
-                <li>
-                  <span className="font-medium">2.</span> 複数データで比較を可能に
-                </li>
-                <li>
-                  <span className="font-medium">3.</span> 原点をゼロに固定（視覚的な正確性）
-                </li>
-                <li>
-                  <span className="font-medium">4.</span> グリッド線・余計な要素を排除
-                </li>
-                <li>
-                  <span className="font-medium">5.</span> 同系色の濃淡で色覚異常にも配慮
-                </li>
-              </ul>
+              <p className="text-sm text-blue-800">
+                このグラフに適用されているデザイン原則について詳しく知りたい方は
+                <a
+                  href="https://note.com/goando/m/me00d3667f5ce"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 hover:underline font-medium ml-1"
+                >
+                  データ視覚化のデザイン｜goando
+                </a>
+                をご覧ください。
+              </p>
             </div>
           </div>
         </div>
