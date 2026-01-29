@@ -1,6 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { DataItem, ColorMode } from '@/types/chart';
+import CSVImportButton from '@/components/ui/CSVImportButton';
+import { parseBarChartCSV } from '@/utils/csvParser';
 
 interface DataInputFormProps {
   title: string;
@@ -21,6 +24,18 @@ export default function DataInputForm({
   onItemsChange,
   onHighlightedIndicesChange,
 }: DataInputFormProps) {
+  const [csvError, setCsvError] = useState<string | null>(null);
+
+  const handleCSVImport = (content: string) => {
+    setCsvError(null);
+    const result = parseBarChartCSV(content);
+    if (result.success) {
+      onItemsChange(result.items);
+    } else {
+      setCsvError(result.error.message);
+    }
+  };
+
   const addItem = () => {
     const newItem: DataItem = {
       id: crypto.randomUUID(),
@@ -78,27 +93,39 @@ export default function DataInputForm({
           <label className="block text-sm font-medium text-gray-700">
             比較データ
           </label>
-          <button
-            type="button"
-            onClick={addItem}
-            className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
-          >
-            <svg
-              className="w-4 h-4 mr-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          <div className="flex items-center gap-2">
+            <CSVImportButton
+              onImport={handleCSVImport}
+              onError={(msg) => setCsvError(msg)}
+            />
+            <button
+              type="button"
+              onClick={addItem}
+              className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            追加
-          </button>
+              <svg
+                className="w-4 h-4 mr-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              追加
+            </button>
+          </div>
         </div>
+
+        {csvError && (
+          <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+            {csvError}
+          </div>
+        )}
 
         <div className="space-y-3">
           {items.map((item, index) => (
