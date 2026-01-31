@@ -14,6 +14,7 @@ interface HorizontalBarChartProps {
   customColors?: string[];
   width?: number;
   height?: number;
+  fontFamily?: string;
 }
 
 export default function HorizontalBarChart({
@@ -24,6 +25,7 @@ export default function HorizontalBarChart({
   customColors,
   width = 600,
   height = 400,
+  fontFamily = 'system-ui, -apple-system, sans-serif',
 }: HorizontalBarChartProps) {
   const svgRef = useRef<SVGSVGElement>(null);
 
@@ -33,8 +35,15 @@ export default function HorizontalBarChart({
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
 
-    // マージン設定
-    const margin = { top: 60, right: 80, bottom: 40, left: 120 };
+    // レスポンシブマージン設定
+    const isSmall = width < 400;
+    const isMedium = width < 500;
+    const margin = {
+      top: isSmall ? 45 : 60,
+      right: isSmall ? 50 : 80,
+      bottom: isSmall ? 30 : 40,
+      left: isSmall ? 80 : isMedium ? 100 : 120,
+    };
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
@@ -67,11 +76,12 @@ export default function HorizontalBarChart({
       svg
         .append('text')
         .attr('x', width / 2)
-        .attr('y', 32)
+        .attr('y', isSmall ? 24 : 32)
         .attr('text-anchor', 'middle')
-        .attr('font-size', '18px')
+        .attr('font-size', isSmall ? '14px' : isMedium ? '16px' : '18px')
         .attr('font-weight', '600')
         .attr('fill', '#1f2937')
+        .attr('font-family', fontFamily)
         .text(data.title);
     }
 
@@ -89,13 +99,14 @@ export default function HorizontalBarChart({
       .call((g) =>
         g
           .selectAll('.tick text')
-          .attr('font-size', '12px')
+          .attr('font-size', isSmall ? '10px' : '12px')
           .attr('fill', '#6b7280')
           .attr('dy', '1em')
+          .attr('font-family', fontFamily)
       );
 
     // Y軸（目盛りなし - 原則4）
-    const yAxis = d3.axisLeft(yScale).tickSize(0).tickPadding(12);
+    const yAxis = d3.axisLeft(yScale).tickSize(0).tickPadding(isSmall ? 6 : 12);
 
     g.append('g')
       .call(yAxis)
@@ -103,9 +114,10 @@ export default function HorizontalBarChart({
       .call((g) =>
         g
           .selectAll('.tick text')
-          .attr('font-size', '14px')
+          .attr('font-size', isSmall ? '11px' : isMedium ? '12px' : '14px')
           .attr('fill', '#374151')
           .attr('font-weight', '500')
+          .attr('font-family', fontFamily)
       );
 
     // 0の基準線
@@ -150,12 +162,13 @@ export default function HorizontalBarChart({
       .enter()
       .append('text')
       .attr('class', 'label')
-      .attr('x', (d) => xScale(d.value) + 8)
+      .attr('x', (d) => xScale(d.value) + (isSmall ? 4 : 8))
       .attr('y', (d) => (yScale(d.label) || 0) + yScale.bandwidth() / 2)
       .attr('dy', '0.35em')
-      .attr('font-size', '14px')
+      .attr('font-size', isSmall ? '11px' : isMedium ? '12px' : '14px')
       .attr('font-weight', '600')
       .attr('fill', '#374151')
+      .attr('font-family', fontFamily)
       .attr('opacity', 0)
       .text((d) => formatNumber(d.value));
 
@@ -165,14 +178,14 @@ export default function HorizontalBarChart({
       .delay(400)
       .ease(d3.easeCubicOut)
       .attr('opacity', 1);
-  }, [data, theme, colorMode, highlightedIndices, customColors, width, height]);
+  }, [data, theme, colorMode, highlightedIndices, customColors, width, height, fontFamily]);
 
   return (
     <svg
       ref={svgRef}
       width={width}
       height={height}
-      style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
+      style={{ fontFamily }}
     />
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import HorizontalBarChart from '@/components/charts/HorizontalBarChart';
 import VerticalBarChart from '@/components/charts/VerticalBarChart';
 import LineChart from '@/components/charts/LineChart';
@@ -9,7 +9,7 @@ import LineDataInputForm from '@/components/forms/LineDataInputForm';
 import ChartTypeSelector from '@/components/forms/ChartTypeSelector';
 import ThemeSelector from '@/components/forms/ThemeSelector';
 import DownloadButtons from '@/components/ui/DownloadButtons';
-import { ChartData, ChartType, ColorTheme, ColorMode, CurveType, LegendStyle, AspectRatio, DataItem, LineChartData, SeriesData } from '@/types/chart';
+import { ChartData, ChartType, ColorTheme, ColorMode, CurveType, LegendStyle, AspectRatio, FontFamily, DataItem, LineChartData, SeriesData } from '@/types/chart';
 import { DEFAULT_THEME } from '@/constants/colorThemes';
 import { generateColorGradient, isValidHexColor } from '@/utils/generateColorTheme';
 
@@ -31,6 +31,8 @@ const initialSeries: SeriesData[] = [
 
 export default function Home() {
   const chartRef = useRef<HTMLDivElement>(null);
+  const chartContainerRef = useRef<HTMLDivElement>(null);
+  const [chartWidth, setChartWidth] = useState(540);
   const [chartType, setChartType] = useState<ChartType>('horizontal-bar');
   const [theme, setTheme] = useState<ColorTheme>(DEFAULT_THEME);
   const [customBaseColor, setCustomBaseColor] = useState<string | null>(null);
@@ -50,6 +52,7 @@ export default function Home() {
   const [curveType, setCurveType] = useState<CurveType>('curved');
   const [legendStyle, setLegendStyle] = useState<LegendStyle>('inline');
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>('4:3');
+  const [fontFamily, setFontFamily] = useState<FontFamily>('system');
 
   const barChartData: ChartData = {
     title: barTitle,
@@ -74,7 +77,7 @@ export default function Home() {
     ? generateColorGradient(customBaseColor)
     : undefined;
 
-  const getChartHeight = (width: number): number => {
+  const getChartHeight = useCallback((width: number): number => {
     switch (aspectRatio) {
       case '1:1':
         return width;
@@ -85,10 +88,41 @@ export default function Home() {
       default:
         return Math.round(width * 3 / 4);
     }
-  };
+  }, [aspectRatio]);
 
-  const renderChart = () => {
-    const chartWidth = 540;
+  const getFontFamilyString = useCallback((): string => {
+    switch (fontFamily) {
+      case 'noto-sans-jp':
+        return '"Noto Sans JP", sans-serif';
+      case 'system':
+      default:
+        return 'system-ui, -apple-system, sans-serif';
+    }
+  }, [fontFamily]);
+
+  // チャートコンテナの幅を監視
+  useEffect(() => {
+    const container = chartContainerRef.current;
+    if (!container) return;
+
+    const updateWidth = () => {
+      const containerWidth = container.clientWidth;
+      // パディング分を引いて、最小幅を確保
+      const newWidth = Math.max(280, containerWidth - 48);
+      setChartWidth(newWidth);
+    };
+
+    // 初期サイズを設定
+    updateWidth();
+
+    // ResizeObserverでサイズ変更を監視
+    const resizeObserver = new ResizeObserver(updateWidth);
+    resizeObserver.observe(container);
+
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  const renderChart = useCallback(() => {
     const chartHeight = getChartHeight(chartWidth);
 
     switch (chartType) {
@@ -102,6 +136,7 @@ export default function Home() {
             customColors={customColors}
             width={chartWidth}
             height={chartHeight}
+            fontFamily={getFontFamilyString()}
           />
         );
       case 'vertical-bar':
@@ -114,6 +149,7 @@ export default function Home() {
             customColors={customColors}
             width={chartWidth}
             height={chartHeight}
+            fontFamily={getFontFamilyString()}
           />
         );
       case 'line':
@@ -128,10 +164,11 @@ export default function Home() {
             legendStyle={legendStyle}
             width={chartWidth}
             height={chartHeight}
+            fontFamily={getFontFamilyString()}
           />
         );
     }
-  };
+  }, [chartType, chartWidth, barChartData, lineChartData, theme, colorMode, highlightedBarIndices, highlightedLineIndices, customColors, curveType, legendStyle, getChartHeight, getFontFamilyString]);
 
   const renderInputForm = () => {
     if (chartType === 'line') {
@@ -285,54 +322,94 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* アスペクト比 */}
-              <div className="pt-4 border-t border-gray-200">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  画像比率
-                </label>
-                <div className="flex gap-2 flex-wrap">
-                  <button
-                    type="button"
-                    onClick={() => setAspectRatio('1:1')}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
-                      aspectRatio === '1:1'
-                        ? 'border-gray-900 bg-gray-50 text-gray-900'
-                        : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                    }`}
-                  >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                      <rect x="4" y="4" width="16" height="16" stroke="currentColor" strokeWidth="2" rx="2" fill="none" />
-                    </svg>
-                    <span className="text-sm font-medium">1:1</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setAspectRatio('4:3')}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
-                      aspectRatio === '4:3'
-                        ? 'border-gray-900 bg-gray-50 text-gray-900'
-                        : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                    }`}
-                  >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                      <rect x="2" y="5" width="20" height="14" stroke="currentColor" strokeWidth="2" rx="2" fill="none" />
-                    </svg>
-                    <span className="text-sm font-medium">4:3</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setAspectRatio('16:9')}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
-                      aspectRatio === '16:9'
-                        ? 'border-gray-900 bg-gray-50 text-gray-900'
-                        : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                    }`}
-                  >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                      <rect x="1" y="7" width="22" height="10" stroke="currentColor" strokeWidth="2" rx="2" fill="none" />
-                    </svg>
-                    <span className="text-sm font-medium">16:9</span>
-                  </button>
+              {/* アスペクト比とフォント */}
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 pt-4 border-t border-gray-200">
+                {/* アスペクト比 */}
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    画像比率
+                  </label>
+                  <div className="flex gap-2 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => setAspectRatio('1:1')}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
+                        aspectRatio === '1:1'
+                          ? 'border-gray-900 bg-gray-50 text-gray-900'
+                          : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                      }`}
+                    >
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                        <rect x="4" y="4" width="16" height="16" stroke="currentColor" strokeWidth="2" rx="2" fill="none" />
+                      </svg>
+                      <span className="text-sm font-medium">1:1</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAspectRatio('4:3')}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
+                        aspectRatio === '4:3'
+                          ? 'border-gray-900 bg-gray-50 text-gray-900'
+                          : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                      }`}
+                    >
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                        <rect x="2" y="5" width="20" height="14" stroke="currentColor" strokeWidth="2" rx="2" fill="none" />
+                      </svg>
+                      <span className="text-sm font-medium">4:3</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAspectRatio('16:9')}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
+                        aspectRatio === '16:9'
+                          ? 'border-gray-900 bg-gray-50 text-gray-900'
+                          : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                      }`}
+                    >
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                        <rect x="1" y="7" width="22" height="10" stroke="currentColor" strokeWidth="2" rx="2" fill="none" />
+                      </svg>
+                      <span className="text-sm font-medium">16:9</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* フォント */}
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    フォント
+                  </label>
+                  <div className="flex gap-2 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => setFontFamily('system')}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
+                        fontFamily === 'system'
+                          ? 'border-gray-900 bg-gray-50 text-gray-900'
+                          : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                      }`}
+                    >
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <text x="6" y="17" fontSize="14" fill="currentColor" stroke="none" fontFamily="system-ui">A</text>
+                      </svg>
+                      <span className="text-sm font-medium">システム</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFontFamily('noto-sans-jp')}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
+                        fontFamily === 'noto-sans-jp'
+                          ? 'border-gray-900 bg-gray-50 text-gray-900'
+                          : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                      }`}
+                    >
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <text x="4" y="17" fontSize="14" fill="currentColor" stroke="none" style={{ fontFamily: '"Noto Sans JP", sans-serif' }}>あ</text>
+                      </svg>
+                      <span className="text-sm font-medium">Noto Sans JP</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -432,8 +509,8 @@ export default function Home() {
           </div>
 
           {/* 右側: プレビュー - sticky */}
-          <div className="lg:sticky lg:top-[60px] space-y-4">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div ref={chartContainerRef} className="lg:sticky lg:top-[60px] space-y-4">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-gray-900">
                   プレビュー
@@ -446,7 +523,7 @@ export default function Home() {
               {hasValidData ? (
                 <div
                   ref={chartRef}
-                  className="bg-white rounded-lg overflow-hidden"
+                  className="bg-white rounded-lg overflow-x-auto"
                 >
                   {renderChart()}
                 </div>

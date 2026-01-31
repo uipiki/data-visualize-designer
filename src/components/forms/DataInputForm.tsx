@@ -129,63 +129,67 @@ export default function DataInputForm({
 
         <div className="space-y-3">
           {items.map((item, index) => (
-            <div key={item.id} className="flex items-center gap-3">
-              {colorMode === 'emphasis' && (
+            <div key={item.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 sm:p-0 bg-gray-50 sm:bg-transparent rounded-lg sm:rounded-none">
+              <div className="flex items-center gap-2 sm:gap-3">
+                {colorMode === 'emphasis' && (
+                  <button
+                    type="button"
+                    onClick={() => toggleHighlight(index)}
+                    className={`w-6 h-6 shrink-0 rounded border-2 flex items-center justify-center transition-colors ${
+                      highlightedIndices.includes(index)
+                        ? 'bg-blue-500 border-blue-500 text-white'
+                        : 'border-gray-300 text-transparent hover:border-gray-400'
+                    }`}
+                    aria-label={highlightedIndices.includes(index) ? '強調を解除' : '強調する'}
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </button>
+                )}
+                {colorMode !== 'emphasis' && (
+                  <span className="text-sm text-gray-400 w-6 shrink-0">{index + 1}</span>
+                )}
+                <input
+                  type="text"
+                  value={item.label}
+                  onChange={(e) => updateItem(item.id, 'label', e.target.value)}
+                  placeholder="ラベル"
+                  className="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
+                />
+              </div>
+              <div className="flex items-center gap-2 sm:gap-3 pl-8 sm:pl-0">
+                <input
+                  type="number"
+                  value={item.value || ''}
+                  onChange={(e) =>
+                    updateItem(item.id, 'value', parseFloat(e.target.value) || 0)
+                  }
+                  placeholder="数値"
+                  className="flex-1 sm:w-28 sm:flex-none px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow text-right"
+                />
                 <button
                   type="button"
-                  onClick={() => toggleHighlight(index)}
-                  className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors ${
-                    highlightedIndices.includes(index)
-                      ? 'bg-blue-500 border-blue-500 text-white'
-                      : 'border-gray-300 text-transparent hover:border-gray-400'
-                  }`}
-                  aria-label={highlightedIndices.includes(index) ? '強調を解除' : '強調する'}
+                  onClick={() => removeItem(item.id)}
+                  disabled={items.length <= 1}
+                  className="p-2 shrink-0 text-gray-400 hover:text-red-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  aria-label="削除"
                 >
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                    <polyline points="20 6 9 17 4 12" />
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
                   </svg>
                 </button>
-              )}
-              {colorMode !== 'emphasis' && (
-                <span className="text-sm text-gray-400 w-6">{index + 1}</span>
-              )}
-              <input
-                type="text"
-                value={item.label}
-                onChange={(e) => updateItem(item.id, 'label', e.target.value)}
-                placeholder="ラベル"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
-              />
-              <input
-                type="number"
-                value={item.value || ''}
-                onChange={(e) =>
-                  updateItem(item.id, 'value', parseFloat(e.target.value) || 0)
-                }
-                placeholder="数値"
-                className="w-28 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow text-right"
-              />
-              <button
-                type="button"
-                onClick={() => removeItem(item.id)}
-                disabled={items.length <= 1}
-                className="p-2 text-gray-400 hover:text-red-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                aria-label="削除"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  />
-                </svg>
-              </button>
+              </div>
             </div>
           ))}
         </div>
