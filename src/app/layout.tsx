@@ -3,7 +3,17 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Data Visualize Designer',
-  description: 'データ視覚化の原則に基づいた「正しいグラフ」を簡単に作成できるWebサービス',
+  description: 'データ視覚化のデザインを参考にしたグラフの出力ができるサイト',
+  openGraph: {
+    title: 'Data Visualize Designer',
+    description: 'データ視覚化のデザインを参考にしたグラフの出力ができるサイト',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Data Visualize Designer',
+    description: 'データ視覚化のデザインを参考にしたグラフの出力ができるサイト',
+  },
 };
 
 export default function RootLayout({
