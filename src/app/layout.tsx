@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://d20r-app.vercel.app'),
   title: 'Data Visualize Designer',
   description: 'データ視覚化のデザインを参考にしたグラフの出力ができるサイト',
   openGraph: {
