@@ -32,6 +32,8 @@ export type LegendStyle = 'legend' | 'inline';
 
 export type AspectRatio = '1:1' | '4:3' | '16:9';
 
+export type FontFamily = 'system' | 'noto-sans-jp';
+
 export type ColorTheme = 'blue' | 'green' | 'purple' | 'gray' | 'orange' | 'custom';
 
 export interface ColorThemeConfig {
