@@ -40,6 +40,7 @@ export default function Home() {
   const [highlightedBarIndices, setHighlightedBarIndices] = useState<number[]>([0]);
   const [highlightedLineIndices, setHighlightedLineIndices] = useState<number[]>([0]);
   const [settingsOpen, setSettingsOpen] = useState(true);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   // 棒グラフ用state
   const [barTitle, setBarTitle] = useState('私の戦闘力は53万です');
@@ -229,7 +230,11 @@ export default function Home() {
           {/* 開閉ボタン */}
           <button
             type="button"
-            onClick={() => setSettingsOpen(!settingsOpen)}
+            onClick={() => {
+              const newOpen = !settingsOpen;
+              setSettingsOpen(newOpen);
+              if (!newOpen) setDetailsOpen(false);
+            }}
             className="w-full flex items-center justify-start gap-2 py-3 text-sm font-medium text-gray-700 hover:text-gray-900"
           >
             <span>グラフ設定</span>
@@ -259,169 +264,260 @@ export default function Home() {
                   <ThemeSelector
                     selected={theme}
                     onChange={setTheme}
-                    customBaseColor={customBaseColor}
-                    onCustomBaseColorChange={setCustomBaseColor}
                   />
                 </div>
               </div>
 
-              {/* 2行目: 配色モード */}
+              {/* 詳細設定 */}
               <div className="pt-4 border-t border-gray-200">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  配色モード
-                </label>
-                <div className="flex gap-2 flex-wrap">
-                  <button
-                    type="button"
-                    onClick={() => setColorMode('gradient')}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
-                      colorMode === 'gradient'
-                        ? 'border-gray-900 bg-gray-50 text-gray-900'
-                        : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                    }`}
+                <button
+                  type="button"
+                  onClick={() => setDetailsOpen(!detailsOpen)}
+                  className="flex items-center justify-start gap-2 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                >
+                  <span>詳細設定</span>
+                  <svg
+                    className={`w-4 h-4 transition-transform ${detailsOpen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                      <rect x="4" y="4" width="4" height="16" fill="#1E40AF" rx="1" />
-                      <rect x="10" y="4" width="4" height="16" fill="#3B82F6" rx="1" />
-                      <rect x="16" y="4" width="4" height="16" fill="#93C5FD" rx="1" />
-                    </svg>
-                    <span className="text-sm font-medium">濃淡</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setColorMode('monochrome')}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
-                      colorMode === 'monochrome'
-                        ? 'border-gray-900 bg-gray-50 text-gray-900'
-                        : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                    }`}
-                  >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                      <rect x="4" y="4" width="4" height="16" fill="#3B82F6" rx="1" />
-                      <rect x="10" y="4" width="4" height="16" fill="#3B82F6" rx="1" />
-                      <rect x="16" y="4" width="4" height="16" fill="#3B82F6" rx="1" />
-                    </svg>
-                    <span className="text-sm font-medium">同色</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setColorMode('emphasis')}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
-                      colorMode === 'emphasis'
-                        ? 'border-gray-900 bg-gray-50 text-gray-900'
-                        : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                    }`}
-                  >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                      <rect x="4" y="4" width="4" height="16" fill="#2563EB" rx="1" />
-                      <rect x="10" y="4" width="4" height="16" fill="#D1D5DB" rx="1" />
-                      <rect x="16" y="4" width="4" height="16" fill="#D1D5DB" rx="1" />
-                    </svg>
-                    <span className="text-sm font-medium">強調</span>
-                  </button>
-                </div>
-              </div>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
 
-              {/* アスペクト比とフォント */}
-              <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 pt-4 border-t border-gray-200">
-                {/* アスペクト比 */}
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    画像比率
-                  </label>
-                  <div className="flex gap-2 flex-wrap">
-                    <button
-                      type="button"
-                      onClick={() => setAspectRatio('1:1')}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
-                        aspectRatio === '1:1'
-                          ? 'border-gray-900 bg-gray-50 text-gray-900'
-                          : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                      }`}
-                    >
-                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                        <rect x="4" y="4" width="16" height="16" stroke="currentColor" strokeWidth="2" rx="2" fill="none" />
-                      </svg>
-                      <span className="text-sm font-medium">1:1</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAspectRatio('4:3')}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
-                        aspectRatio === '4:3'
-                          ? 'border-gray-900 bg-gray-50 text-gray-900'
-                          : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                      }`}
-                    >
-                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                        <rect x="2" y="5" width="20" height="14" stroke="currentColor" strokeWidth="2" rx="2" fill="none" />
-                      </svg>
-                      <span className="text-sm font-medium">4:3</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAspectRatio('16:9')}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
-                        aspectRatio === '16:9'
-                          ? 'border-gray-900 bg-gray-50 text-gray-900'
-                          : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                      }`}
-                    >
-                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                        <rect x="1" y="7" width="22" height="10" stroke="currentColor" strokeWidth="2" rx="2" fill="none" />
-                      </svg>
-                      <span className="text-sm font-medium">16:9</span>
-                    </button>
-                  </div>
-                </div>
+                <div
+                  className={`overflow-hidden transition-all duration-300 ${
+                    detailsOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
+                  }`}
+                >
+                  <div className="flex flex-col gap-4 pt-4">
+                    {/* 配色モードとカスタムカラー */}
+                    <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
+                      {/* 配色モード */}
+                      <div className="flex-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          配色モード
+                        </label>
+                        <div className="flex gap-2 flex-wrap">
+                          <button
+                            type="button"
+                            onClick={() => setColorMode('gradient')}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
+                              colorMode === 'gradient'
+                                ? 'border-gray-900 bg-gray-50 text-gray-900'
+                                : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                            }`}
+                          >
+                            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                              <rect x="4" y="4" width="4" height="16" fill="#1E40AF" rx="1" />
+                              <rect x="10" y="4" width="4" height="16" fill="#3B82F6" rx="1" />
+                              <rect x="16" y="4" width="4" height="16" fill="#93C5FD" rx="1" />
+                            </svg>
+                            <span className="text-sm font-medium">濃淡</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setColorMode('monochrome')}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
+                              colorMode === 'monochrome'
+                                ? 'border-gray-900 bg-gray-50 text-gray-900'
+                                : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                            }`}
+                          >
+                            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                              <rect x="4" y="4" width="4" height="16" fill="#3B82F6" rx="1" />
+                              <rect x="10" y="4" width="4" height="16" fill="#3B82F6" rx="1" />
+                              <rect x="16" y="4" width="4" height="16" fill="#3B82F6" rx="1" />
+                            </svg>
+                            <span className="text-sm font-medium">同色</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setColorMode('emphasis')}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
+                              colorMode === 'emphasis'
+                                ? 'border-gray-900 bg-gray-50 text-gray-900'
+                                : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                            }`}
+                          >
+                            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                              <rect x="4" y="4" width="4" height="16" fill="#2563EB" rx="1" />
+                              <rect x="10" y="4" width="4" height="16" fill="#D1D5DB" rx="1" />
+                              <rect x="16" y="4" width="4" height="16" fill="#D1D5DB" rx="1" />
+                            </svg>
+                            <span className="text-sm font-medium">強調</span>
+                          </button>
+                        </div>
+                      </div>
 
-                {/* フォント */}
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    フォント
-                  </label>
-                  <div className="flex gap-2 flex-wrap">
-                    <button
-                      type="button"
-                      onClick={() => setFontFamily('system')}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
-                        fontFamily === 'system'
-                          ? 'border-gray-900 bg-gray-50 text-gray-900'
-                          : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                      }`}
-                    >
-                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <text x="6" y="17" fontSize="14" fill="currentColor" stroke="none" fontFamily="system-ui">A</text>
-                      </svg>
-                      <span className="text-sm font-medium">システム</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFontFamily('noto-sans-jp')}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
-                        fontFamily === 'noto-sans-jp'
-                          ? 'border-gray-900 bg-gray-50 text-gray-900'
-                          : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                      }`}
-                    >
-                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <text x="4" y="17" fontSize="14" fill="currentColor" stroke="none" style={{ fontFamily: '"Noto Sans JP", sans-serif' }}>あ</text>
-                      </svg>
-                      <span className="text-sm font-medium">Noto Sans JP</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
+                      {/* カスタムカラー */}
+                      <div className="flex-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          カスタムカラー
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={customBaseColor || '#3B82F6'}
+                            onChange={(e) => {
+                              const color = e.target.value;
+                              setCustomBaseColor(color);
+                              if (isValidHexColor(color)) {
+                                setTheme('custom');
+                              }
+                            }}
+                            className="w-8 h-8 rounded cursor-pointer border border-gray-300"
+                            aria-label="カスタムカラーを選択"
+                          />
+                          <input
+                            type="text"
+                            value={customBaseColor || ''}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              setCustomBaseColor(value);
+                              if (isValidHexColor(value)) {
+                                setTheme('custom');
+                              }
+                            }}
+                            placeholder="#3B82F6"
+                            className="w-24 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            aria-label="カスタムカラーコードを入力"
+                          />
+                          {/* カスタムカラーのプレビュー */}
+                          {customBaseColor && isValidHexColor(customBaseColor) && (
+                            <button
+                              type="button"
+                              onClick={() => setTheme('custom')}
+                              className={`relative flex items-center gap-2 p-2 rounded-lg border-2 transition-all ${
+                                theme === 'custom'
+                                  ? 'border-gray-900 bg-gray-50'
+                                  : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                              }`}
+                              aria-label="カスタムテーマを選択"
+                            >
+                              <div className="flex gap-0.5">
+                                {generateColorGradient(customBaseColor).slice(0, 4).map((color, i) => (
+                                  <div
+                                    key={i}
+                                    className="w-4 h-6 first:rounded-l last:rounded-r"
+                                    style={{ backgroundColor: color }}
+                                  />
+                                ))}
+                              </div>
+                              {theme === 'custom' && (
+                                <div className="absolute -top-1 -right-1 w-5 h-5 bg-gray-900 rounded-full flex items-center justify-center">
+                                  <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                </div>
+                              )}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
 
-              {/* 折れ線グラフ専用設定 */}
-              {chartType === 'line' && (
-                <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 pt-4 border-t border-gray-200">
-                  {/* 線のスタイル */}
-                  <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      線のスタイル
-                    </label>
-                    <div className="flex gap-2">
+                    {/* アスペクト比とフォント */}
+                    <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 pt-4 border-t border-gray-200">
+                      {/* アスペクト比 */}
+                      <div className="flex-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          画像比率
+                        </label>
+                        <div className="flex gap-2 flex-wrap">
+                          <button
+                            type="button"
+                            onClick={() => setAspectRatio('1:1')}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
+                              aspectRatio === '1:1'
+                                ? 'border-gray-900 bg-gray-50 text-gray-900'
+                                : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                            }`}
+                          >
+                            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                              <rect x="4" y="4" width="16" height="16" stroke="currentColor" strokeWidth="2" rx="2" fill="none" />
+                            </svg>
+                            <span className="text-sm font-medium">1:1</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setAspectRatio('4:3')}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
+                              aspectRatio === '4:3'
+                                ? 'border-gray-900 bg-gray-50 text-gray-900'
+                                : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                            }`}
+                          >
+                            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                              <rect x="2" y="5" width="20" height="14" stroke="currentColor" strokeWidth="2" rx="2" fill="none" />
+                            </svg>
+                            <span className="text-sm font-medium">4:3</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setAspectRatio('16:9')}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
+                              aspectRatio === '16:9'
+                                ? 'border-gray-900 bg-gray-50 text-gray-900'
+                                : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                            }`}
+                          >
+                            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                              <rect x="1" y="7" width="22" height="10" stroke="currentColor" strokeWidth="2" rx="2" fill="none" />
+                            </svg>
+                            <span className="text-sm font-medium">16:9</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* フォント */}
+                      <div className="flex-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          フォント
+                        </label>
+                        <div className="flex gap-2 flex-wrap">
+                          <button
+                            type="button"
+                            onClick={() => setFontFamily('system')}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
+                              fontFamily === 'system'
+                                ? 'border-gray-900 bg-gray-50 text-gray-900'
+                                : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                            }`}
+                          >
+                            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <text x="6" y="17" fontSize="14" fill="currentColor" stroke="none" fontFamily="system-ui">A</text>
+                            </svg>
+                            <span className="text-sm font-medium">システム</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setFontFamily('noto-sans-jp')}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
+                              fontFamily === 'noto-sans-jp'
+                                ? 'border-gray-900 bg-gray-50 text-gray-900'
+                                : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                            }`}
+                          >
+                            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <text x="4" y="17" fontSize="14" fill="currentColor" stroke="none" style={{ fontFamily: '"Noto Sans JP", sans-serif' }}>あ</text>
+                            </svg>
+                            <span className="text-sm font-medium">Noto Sans JP</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 折れ線グラフ専用設定 */}
+                    {chartType === 'line' && (
+                      <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 pt-4 border-t border-gray-200">
+                        {/* 線のスタイル */}
+                        <div className="flex-1">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            線のスタイル
+                          </label>
+                          <div className="flex gap-2">
                       <button
                         type="button"
                         onClick={() => setCurveType('linear')}
@@ -450,51 +546,54 @@ export default function Home() {
                         </svg>
                         <span className="text-sm font-medium">曲線</span>
                       </button>
-                    </div>
-                  </div>
+                          </div>
+                        </div>
 
-                  {/* ラベル表示 */}
-                  <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      ラベル表示
-                    </label>
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setLegendStyle('inline')}
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
-                          legendStyle === 'inline'
-                            ? 'border-gray-900 bg-gray-50 text-gray-900'
-                            : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                        }`}
-                      >
-                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                          <line x1="4" y1="12" x2="16" y2="12" />
-                          <text x="17" y="13" fontSize="6" fill="currentColor" stroke="none">A</text>
-                        </svg>
-                        <span className="text-sm font-medium">終端</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setLegendStyle('legend')}
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
-                          legendStyle === 'legend'
-                            ? 'border-gray-900 bg-gray-50 text-gray-900'
-                            : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                        }`}
-                      >
-                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                          <line x1="4" y1="8" x2="10" y2="8" />
-                          <text x="12" y="9" fontSize="5" fill="currentColor" stroke="none">A</text>
-                          <line x1="4" y1="14" x2="10" y2="14" />
-                          <text x="12" y="15" fontSize="5" fill="currentColor" stroke="none">B</text>
-                        </svg>
-                        <span className="text-sm font-medium">凡例</span>
-                      </button>
-                    </div>
+                        {/* ラベル表示 */}
+                        <div className="flex-1">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            ラベル表示
+                          </label>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setLegendStyle('inline')}
+                              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
+                                legendStyle === 'inline'
+                                  ? 'border-gray-900 bg-gray-50 text-gray-900'
+                                  : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                              }`}
+                            >
+                              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                                <line x1="4" y1="12" x2="16" y2="12" />
+                                <text x="17" y="13" fontSize="6" fill="currentColor" stroke="none">A</text>
+                              </svg>
+                              <span className="text-sm font-medium">終端</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setLegendStyle('legend')}
+                              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all ${
+                                legendStyle === 'legend'
+                                  ? 'border-gray-900 bg-gray-50 text-gray-900'
+                                  : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                              }`}
+                            >
+                              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                                <line x1="4" y1="8" x2="10" y2="8" />
+                                <text x="12" y="9" fontSize="5" fill="currentColor" stroke="none">A</text>
+                                <line x1="4" y1="14" x2="10" y2="14" />
+                                <text x="12" y="15" fontSize="5" fill="currentColor" stroke="none">B</text>
+                              </svg>
+                              <span className="text-sm font-medium">凡例</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
