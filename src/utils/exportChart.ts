@@ -34,13 +34,13 @@ export async function exportToPng(
  */
 export async function exportToSvg(
   element: HTMLElement,
-  options: ExportOptions = {}
+  options: ExportOptions & { transparent?: boolean } = {}
 ): Promise<void> {
-  const { filename = 'chart', backgroundColor = '#ffffff' } = options;
+  const { filename = 'chart', backgroundColor = '#ffffff', transparent = false } = options;
 
   try {
     const dataUrl = await toSvg(element, {
-      backgroundColor,
+      backgroundColor: transparent ? undefined : backgroundColor,
       cacheBust: true,
     });
 

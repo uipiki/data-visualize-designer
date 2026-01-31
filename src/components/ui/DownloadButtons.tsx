@@ -13,6 +13,7 @@ export default function DownloadButtons({
   filename = 'chart',
 }: DownloadButtonsProps) {
   const [isExporting, setIsExporting] = useState<'png' | 'svg' | null>(null);
+  const [transparentBg, setTransparentBg] = useState(false);
 
   const handleExport = async (format: 'png' | 'svg') => {
     if (!chartRef.current || isExporting) return;
@@ -22,7 +23,7 @@ export default function DownloadButtons({
       if (format === 'png') {
         await exportToPng(chartRef.current, { filename, pixelRatio: 3 });
       } else {
-        await exportToSvg(chartRef.current, { filename });
+        await exportToSvg(chartRef.current, { filename, transparent: transparentBg });
       }
     } catch (error) {
       console.error('Export failed:', error);
@@ -120,6 +121,15 @@ export default function DownloadButtons({
         )}
         SVG
       </button>
+      <label className="inline-flex items-center cursor-pointer select-none">
+        <input
+          type="checkbox"
+          checked={transparentBg}
+          onChange={(e) => setTransparentBg(e.target.checked)}
+          className="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-500"
+        />
+        <span className="ml-2 text-sm text-gray-600">透過</span>
+      </label>
     </div>
   );
 }
