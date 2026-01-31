@@ -230,7 +230,7 @@ export default function Home() {
           <button
             type="button"
             onClick={() => setSettingsOpen(!settingsOpen)}
-            className="w-full flex items-center justify-between py-3 text-sm font-medium text-gray-700 hover:text-gray-900"
+            className="w-full flex items-center justify-start gap-2 py-3 text-sm font-medium text-gray-700 hover:text-gray-900"
           >
             <span>グラフ設定</span>
             <svg

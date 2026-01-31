@@ -163,13 +163,6 @@ export default function ThemeSelector({
           )}
         </div>
       </div>
-
-      <p className="mt-2 text-xs text-gray-500">
-        {selected === 'custom' && customBaseColor
-          ? 'カスタムカラーを使用'
-          : COLOR_THEMES[selected as PresetColorTheme]?.description || ''
-        }
-      </p>
     </div>
   );
 }
